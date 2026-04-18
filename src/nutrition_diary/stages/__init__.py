@@ -6,6 +6,7 @@ from nutrition_diary.stages.ground import GroundStage
 from nutrition_diary.stages.metadata import MetadataStage
 from nutrition_diary.stages.recognize import RecognizeStage
 from nutrition_diary.stages.source import SourceStage
+from nutrition_diary.stages.upload import UploadStage
 
 __all__ = [
     "AssembleStage",
@@ -17,6 +18,7 @@ __all__ = [
     "SourceStage",
     "StageContext",
     "StageScope",
+    "UploadStage",
     "run_stage",
     "stage_status_summary",
 ]
