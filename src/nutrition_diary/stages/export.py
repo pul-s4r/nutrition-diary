@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Iterable
 
 from nutrition_diary.export.writer import append_jsonl, existing_entry_ids
@@ -47,14 +46,27 @@ class ExportStage(Stage):
             append_jsonl(export_path, payload)
 
         now = int(time.time())
-        ctx.db.execute(
-            """
-            INSERT INTO upload_queue(entry_id, target, status, attempts, last_error, updated_at)
-            VALUES (?, ?, 'pending', 0, NULL, ?)
-            ON CONFLICT(entry_id, target) DO UPDATE SET
-              updated_at=excluded.updated_at
-            """,
-            (item_key, self.target, now),
-        )
+        if ctx.force:
+            ctx.db.execute(
+                """
+                INSERT INTO upload_queue(entry_id, target, status, attempts, last_error, updated_at)
+                VALUES (?, ?, 'pending', 0, NULL, ?)
+                ON CONFLICT(entry_id, target) DO UPDATE SET
+                  status='pending',
+                  last_error=NULL,
+                  updated_at=excluded.updated_at
+                """,
+                (item_key, self.target, now),
+            )
+        else:
+            ctx.db.execute(
+                """
+                INSERT INTO upload_queue(entry_id, target, status, attempts, last_error, updated_at)
+                VALUES (?, ?, 'pending', 0, NULL, ?)
+                ON CONFLICT(entry_id, target) DO UPDATE SET
+                  updated_at=excluded.updated_at
+                """,
+                (item_key, self.target, now),
+            )
         return {"export_path": str(export_path), "queued_target": self.target, **payload}
 

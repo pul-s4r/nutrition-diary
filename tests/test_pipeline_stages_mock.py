@@ -57,3 +57,11 @@ def test_end_to_end_mock(tmp_path: Path) -> None:
     pending = db.execute("SELECT COUNT(*) AS n FROM upload_queue WHERE status='pending'").fetchone()
     assert int(pending["n"]) == 0
 
+    # Re-export with --force resets upload_queue to pending so upload can run again
+    ctx_force = StageContext(db=db, settings=settings, dump_dir=None, force=True, dry_run=False)
+    run_stage(ExportStage(target="csv"), ctx_force, scope)
+    pending_after = db.execute(
+        "SELECT COUNT(*) AS n FROM upload_queue WHERE status='pending' AND target='csv'"
+    ).fetchone()
+    assert int(pending_after["n"]) >= 1
+

@@ -57,7 +57,10 @@ class AssembleStage(Stage):
             ident = json.loads(str(ident_json))
             llm_conf = float(r["confidence"] or 0.0)
             match_conf = r["match_conf"]
-            overall = min(llm_conf, float(match_conf) if match_conf is not None else 0.0)
+            if match_conf is not None:
+                overall = min(llm_conf, float(match_conf))
+            else:
+                overall = llm_conf
 
             item = FoodItem(
                 name=str(ident["name"]),
