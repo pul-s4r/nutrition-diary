@@ -36,3 +36,11 @@ class Settings(BaseSettings):
     usda_negative_cache_ttl_days: int = Field(default=7)
     usda_match_threshold: float = Field(default=0.65)
 
+    # Google Drive (optional `pip install nutrition-diary[gdrive]`)
+    gdrive_credentials_path: Path | None = Field(default=None)
+    gdrive_token_path: Path = Field(default=Path("data/gdrive_token.json"))
+    gdrive_scopes: list[str] = Field(
+        default_factory=lambda: ["https://www.googleapis.com/auth/drive.readonly"],
+    )
+    gdrive_staging_dir: Path = Field(default=Path("data/gdrive_staging"))
+

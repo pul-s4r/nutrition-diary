@@ -9,6 +9,8 @@ from rich.table import Table
 
 from nutrition_diary.config import Settings
 from nutrition_diary.db import connect, migrate
+from nutrition_diary.sources.base import PhotoSource
+from nutrition_diary.sources.google_drive import GoogleDrivePhotoSource
 from nutrition_diary.sources.local import LocalPhotoSource
 from nutrition_diary.stages import (
     AssembleStage,
@@ -29,6 +31,17 @@ app = typer.Typer(no_args_is_help=True)
 console = Console()
 
 
+def _resolve_photo_source(settings: Settings, source: str, path: Path) -> tuple[PhotoSource, Path]:
+    if source == "local":
+        root = path.expanduser().resolve()
+        if not root.is_dir():
+            raise typer.BadParameter(f"Local --path must be an existing directory: {root}")
+        return LocalPhotoSource(), root
+    if source == "gdrive":
+        return GoogleDrivePhotoSource(settings=settings), path
+    raise typer.BadParameter(f"Unsupported --source {source!r}. Use 'local' or 'gdrive'.")
+
+
 def _ctx(
     settings: Settings,
     *,
@@ -45,7 +58,14 @@ def _ctx(
 @app.command()
 def ingest(
     source: str = typer.Option("local", "--source"),
-    path: Path = typer.Option(..., "--path", exists=True, file_okay=False, dir_okay=True),
+    path: Path = typer.Option(
+        ...,
+        "--path",
+        exists=False,
+        file_okay=True,
+        dir_okay=True,
+        help="Local directory of photos, or a Google Drive folder ID when --source gdrive",
+    ),
     since: Optional[str] = typer.Option(None, "--since", help="YYYY-MM-DD"),
     dump: bool = typer.Option(False, "--dump"),
     force: bool = typer.Option(False, "--force"),
@@ -55,10 +75,8 @@ def ingest(
     ctx = _ctx(settings, dump=dump, force=force, dry_run=dry_run)
     scope = StageScope(since_date=since)
 
-    if source != "local":
-        raise typer.BadParameter("Only --source local is supported in v1 implementation.")
-
-    source_stage = SourceStage(source=LocalPhotoSource(), root=path)
+    photo_source, root = _resolve_photo_source(settings, source, path)
+    source_stage = SourceStage(source=photo_source, root=root)
     stages = [
         source_stage,
         MetadataStage(),
@@ -94,6 +112,7 @@ def upload(
 def run_one_stage(
     stage_name: str = typer.Argument(...),
     path: Optional[Path] = typer.Option(None, "--path", help="Required for stage 'source'"),
+    source: str = typer.Option("local", "--source"),
     since: Optional[str] = typer.Option(None, "--since", help="YYYY-MM-DD"),
     photo: list[str] = typer.Option([], "--photo", help="Photo hash (repeatable)"),
     cluster_id: Optional[str] = typer.Option(None, "--meal"),
@@ -120,7 +139,8 @@ def run_one_stage(
     if stage_name == "source":
         if path is None:
             raise typer.BadParameter("--path is required for stage 'source'")
-        st = SourceStage(source=LocalPhotoSource(), root=path)
+        photo_source, root = _resolve_photo_source(settings, source, path)
+        st = SourceStage(source=photo_source, root=root)
     else:
         st = stage_map.get(stage_name)
         if st is None:
