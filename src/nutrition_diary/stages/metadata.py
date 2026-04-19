@@ -81,4 +81,3 @@ class MetadataStage(Stage):
             "make": make,
             "model": model,
         }
-

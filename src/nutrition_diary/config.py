@@ -41,4 +41,3 @@ class Settings(BaseSettings):
     mfp_mode: Literal["csv", "live"] = Field(default="csv")
     mfp_cookie_path: Path | None = Field(default=None)
     mfp_csv_dir: Path = Field(default=Path("data/mfp_imports"))
-

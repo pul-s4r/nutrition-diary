@@ -30,4 +30,3 @@ class LocalPhotoSource(PhotoSource):
                 if mtime.date() < since_dt.date():
                     continue
             yield path
-

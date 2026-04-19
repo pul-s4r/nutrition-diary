@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from nutrition_diary.schema.entry import DiaryEntry, FoodItem
+from nutrition_diary.schema.entry import DiaryEntry
 
 MFP_CSV_HEADER: list[str] = [
     "Date",

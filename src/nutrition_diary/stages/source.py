@@ -54,4 +54,3 @@ class SourceStage(Stage):
             }
 
         raise FileNotFoundError(f"Could not locate photo bytes for hash={item_key}")
-

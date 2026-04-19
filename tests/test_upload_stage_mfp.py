@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from nutrition_diary.config import Settings
 from nutrition_diary.db import connect, migrate
-from nutrition_diary.schema.entry import DiaryEntry, FoodItem
+from nutrition_diary.schema.entry import DiaryEntry
 from nutrition_diary.uploaders.base import SubmitResult
 from nutrition_diary.stages import StageContext, StageScope, UploadStage, run_stage
 
@@ -66,6 +66,8 @@ def test_upload_stage_mfp_success_updates_queue(tmp_path) -> None:
 
     ctx = StageContext(db=db, settings=settings)
     run_stage(UploadStage(target="mfp", uploader=_FakeMFP()), ctx, StageScope(entry_id="ent1"))
-    row = db.execute("SELECT status, last_error FROM upload_queue WHERE entry_id=? AND target='mfp'", ("ent1",)).fetchone()
+    row = db.execute(
+        "SELECT status, last_error FROM upload_queue WHERE entry_id=? AND target='mfp'", ("ent1",)
+    ).fetchone()
     assert str(row["status"]) == "success"
     assert row["last_error"] is None

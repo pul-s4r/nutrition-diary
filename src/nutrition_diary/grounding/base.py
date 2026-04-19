@@ -24,4 +24,3 @@ class GroundingResult:
 
 class NutritionGrounder(Protocol):
     def ground(self, food_name: str, serving_size_g: float) -> GroundingResult | None: ...
-
