@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     recognizer: str = Field(default="mock")  # "mock" or "bedrock"
     bedrock_region: str = Field(default="us-east-1")
     bedrock_model_id: str = Field(default="us.anthropic.claude-sonnet-4-6-20260310-v1:0")
+    bedrock_fallback_model_id: str | None = Field(default=None)
+    # USD per 1M tokens (override for your model pricing)
+    bedrock_input_price_per_mtok: float = Field(default=3.0)
+    bedrock_output_price_per_mtok: float = Field(default=15.0)
     max_concurrent_requests: int = Field(default=5)
     max_spend_per_run: float = Field(default=5.00)
 
