@@ -53,4 +53,3 @@ class DiaryEntry:
             "notes": self.notes,
             "overall_confidence": self.overall_confidence,
         }
-

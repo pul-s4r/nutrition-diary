@@ -56,4 +56,3 @@ class CsvExportUploader:
                     ]
                 )
         return SubmitResult(success=True, external_id=str(out_path))
-

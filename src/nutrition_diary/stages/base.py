@@ -148,4 +148,3 @@ def stage_status_summary(db: sqlite3.Connection, stage_name: str | None = None) 
             (stage_name,),
         ).fetchall()
     return [dict(r) for r in rows]
-

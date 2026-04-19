@@ -76,5 +76,9 @@ class UploadStage(Stage):
                 """,
                 (res.error, now, item_key, self.target),
             )
-        return {"entry_id": item_key, "target": self.target, "success": res.success, "external_id": res.external_id}
-
+        return {
+            "entry_id": item_key,
+            "target": self.target,
+            "success": res.success,
+            "external_id": res.external_id,
+        }

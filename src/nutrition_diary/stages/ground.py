@@ -46,8 +46,6 @@ class GroundStage(Stage):
             return {"photo_hash": item_key, "grounded": False, "reason": "not_food"}
 
         ident = json.loads(str(ident_json))
-        food_name = str(ident["name"])
-        serving_size_g = float(ident["serving_size_g"])
 
         if ctx.settings.usda_api_key is None:
             ctx.db.execute(
@@ -63,6 +61,5 @@ class GroundStage(Stage):
 
         raise RuntimeError(
             "USDA grounding is not yet wired to live API in this implementation. "
-            "Set ND_USDA_API_KEY to enable later, or use mock mode."
+            f"Identified food {ident.get('name')!r}; set ND_USDA_API_KEY when supported, or use mock mode."
         )
-

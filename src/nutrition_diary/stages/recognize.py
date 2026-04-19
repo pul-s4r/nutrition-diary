@@ -22,8 +22,7 @@ class RecognizeStage(Stage):
         if ctx.settings.recognizer == "mock":
             return MockRecognizer()
         raise RuntimeError(
-            f"Unsupported recognizer '{ctx.settings.recognizer}'. "
-            "For now, set ND_RECOGNIZER=mock."
+            f"Unsupported recognizer '{ctx.settings.recognizer}'. For now, set ND_RECOGNIZER=mock."
         )
 
     def select_work(self, ctx: StageContext, scope: StageScope) -> Iterable[str]:
@@ -93,4 +92,3 @@ class RecognizeStage(Stage):
             "meal_confidence": analysis.meal_confidence,
             "latency_ms": latency_ms,
         }
-

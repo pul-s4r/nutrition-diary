@@ -23,11 +23,12 @@ class LLMFoodAnalysisResult:
 
     def to_dict(self) -> dict:
         return {
-            "identification": None if self.identification is None else self.identification.to_dict(),
+            "identification": None
+            if self.identification is None
+            else self.identification.to_dict(),
             "meal_confidence": self.meal_confidence,
         }
 
 
 class FoodRecognizer(Protocol):
     def analyze(self, image_bytes: bytes, *, context: dict) -> LLMFoodAnalysisResult: ...
-
