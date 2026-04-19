@@ -64,4 +64,3 @@ def test_end_to_end_mock(tmp_path: Path) -> None:
         "SELECT COUNT(*) AS n FROM upload_queue WHERE status='pending' AND target='csv'"
     ).fetchone()
     assert int(pending_after["n"]) >= 1
-

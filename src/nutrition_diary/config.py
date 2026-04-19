@@ -43,4 +43,3 @@ class Settings(BaseSettings):
         default_factory=lambda: ["https://www.googleapis.com/auth/drive.readonly"],
     )
     gdrive_staging_dir: Path = Field(default=Path("data/gdrive_staging"))
-

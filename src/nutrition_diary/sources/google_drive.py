@@ -136,7 +136,9 @@ class GoogleDrivePhotoSource(PhotoSource):
         out.write_bytes(data)
         return out
 
-    def _iter_drive_images(self, service: Any, folder_id: str, since: datetime | None) -> Iterator[dict[str, Any]]:
+    def _iter_drive_images(
+        self, service: Any, folder_id: str, since: datetime | None
+    ) -> Iterator[dict[str, Any]]:
         q_root = deque([folder_id])
         while q_root:
             fid = q_root.popleft()

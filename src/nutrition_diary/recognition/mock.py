@@ -21,4 +21,3 @@ class MockRecognizer:
             confidence=0.5,
         )
         return LLMFoodAnalysisResult(identification=ident, meal_confidence=ident.confidence)
-

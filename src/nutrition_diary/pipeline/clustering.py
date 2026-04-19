@@ -41,4 +41,3 @@ def deterministic_cluster_id(date: str, meal_type: str, photo_hashes: Iterable[s
 def parse_taken_at(iso: str) -> datetime:
     # stored as datetime.isoformat() without timezone in v1
     return datetime.fromisoformat(iso)
-

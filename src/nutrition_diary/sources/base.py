@@ -27,4 +27,3 @@ class PhotoSource(Protocol):
     name: str
 
     def list_photos(self, root: Path, *, since_date: str | None = None) -> Iterator[Path]: ...
-
