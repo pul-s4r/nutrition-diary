@@ -28,4 +28,3 @@ def existing_entry_ids(path: Path) -> set[str]:
             if isinstance(entry_id, str):
                 ids.add(entry_id)
     return ids
-

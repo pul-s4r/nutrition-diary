@@ -94,4 +94,3 @@ class ClusterStage(Stage):
             )
 
         return {"cluster_id": item_key, **cluster}
-

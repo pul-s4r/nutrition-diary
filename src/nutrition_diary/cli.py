@@ -71,7 +71,9 @@ def ingest(
 
     for st in stages:
         res = run_stage(st, ctx, scope)
-        console.print(f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}")
+        console.print(
+            f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}"
+        )
 
 
 @app.command()
@@ -87,7 +89,9 @@ def upload(
     scope = StageScope(entry_id=entry_id)
 
     res = run_stage(UploadStage(target=target), ctx, scope)
-    console.print(f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}")
+    console.print(
+        f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}"
+    )
 
 
 @app.command("stage")
@@ -105,7 +109,9 @@ def run_one_stage(
 ) -> None:
     settings = Settings()
     ctx = _ctx(settings, dump=dump, force=force, dry_run=dry_run)
-    scope = StageScope(since_date=since, photo_hashes=photo or None, cluster_id=cluster_id, entry_id=entry_id)
+    scope = StageScope(
+        since_date=since, photo_hashes=photo or None, cluster_id=cluster_id, entry_id=entry_id
+    )
 
     stage_map = {
         "metadata": MetadataStage(),
@@ -127,7 +133,9 @@ def run_one_stage(
             raise typer.BadParameter(f"Unknown stage: {stage_name}")
 
     res = run_stage(st, ctx, scope)
-    console.print(f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}")
+    console.print(
+        f"[bold]{res.stage}[/bold]: processed={res.processed} skipped={res.skipped} failed={res.failed}"
+    )
 
 
 @app.command()
@@ -143,4 +151,3 @@ def status(stage: Optional[str] = typer.Option(None, "--stage")) -> None:
     for row in summary:
         table.add_row(str(row["stage_name"]), str(row["status"]), str(row["n"]))
     console.print(table)
-

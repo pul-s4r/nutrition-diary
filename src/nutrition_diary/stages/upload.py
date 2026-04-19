@@ -9,6 +9,7 @@ from nutrition_diary.schema.entry import DiaryEntry, FoodItem
 from nutrition_diary.stages.base import Stage, StageContext, StageScope
 from nutrition_diary.uploaders.base import DiaryUploader
 from nutrition_diary.uploaders.csv_export import CsvExportUploader
+from nutrition_diary.uploaders.myfitnesspal import MyFitnessPalUploader
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,8 @@ class UploadStage(Stage):
             return self.uploader
         if self.target == "csv":
             return CsvExportUploader()
+        if self.target == "mfp":
+            return MyFitnessPalUploader(settings=ctx.settings)
         raise RuntimeError(f"Unsupported upload target: {self.target}")
 
     def select_work(self, ctx: StageContext, scope: StageScope) -> Iterable[str]:
@@ -76,5 +79,9 @@ class UploadStage(Stage):
                 """,
                 (res.error, now, item_key, self.target),
             )
-        return {"entry_id": item_key, "target": self.target, "success": res.success, "external_id": res.external_id}
-
+        return {
+            "entry_id": item_key,
+            "target": self.target,
+            "success": res.success,
+            "external_id": res.external_id,
+        }

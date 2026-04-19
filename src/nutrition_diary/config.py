@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import time
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,3 +37,7 @@ class Settings(BaseSettings):
     usda_negative_cache_ttl_days: int = Field(default=7)
     usda_match_threshold: float = Field(default=0.65)
 
+    # MyFitnessPal upload (CSV manual import; optional live session verification)
+    mfp_mode: Literal["csv", "live"] = Field(default="csv")
+    mfp_cookie_path: Path | None = Field(default=None)
+    mfp_csv_dir: Path = Field(default=Path("data/mfp_imports"))

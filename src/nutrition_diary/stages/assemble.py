@@ -106,4 +106,3 @@ class AssembleStage(Stage):
             ),
         )
         return entry.to_dict()
-

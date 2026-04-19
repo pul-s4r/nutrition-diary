@@ -206,4 +206,3 @@ def _create_schema_v2(conn: sqlite3.Connection) -> None:
     )
 
     conn.commit()
-
