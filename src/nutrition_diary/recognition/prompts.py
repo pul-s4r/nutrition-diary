@@ -13,6 +13,6 @@ Rules:
 FOOD_ANALYSIS_USER_TEMPLATE = """{meal_context}Analyze the meal in this image."""
 
 FOOD_ANALYSIS_SIMPLIFIED_SYSTEM = """Return JSON only matching this shape:
-{{"identification": {{"name": str, "serving_size_g": float, "serving_unit": "g", "serving_description": str, "confidence": float}} | null,
- "meal_confidence": float}}
+{"identification": {"name": str, "serving_size_g": float, "serving_unit": "g", "serving_description": str, "confidence": float} | null,
+ "meal_confidence": float}
 If not food, use identification null and meal_confidence 0.0. No other text."""

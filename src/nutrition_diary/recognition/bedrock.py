@@ -21,6 +21,10 @@ from nutrition_diary.recognition.prompts import (
 logger = logging.getLogger(__name__)
 
 
+class StructuredOutputParseError(Exception):
+    """`with_structured_output(include_raw=True)` returned no parsed model."""
+
+
 class _IdentModel(BaseModel):
     name: str
     serving_size_g: float
@@ -31,7 +35,8 @@ class _IdentModel(BaseModel):
 
 class _AnalysisModel(BaseModel):
     identification: _IdentModel | None = None
-    meal_confidence: float = Field(ge=0.0, le=1.0, default=0.0)
+    # None = omit from model output; fall back to identification.confidence in _to_result.
+    meal_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 def _retryable(exc: BaseException) -> bool:
@@ -78,7 +83,10 @@ def _to_result(parsed: _AnalysisModel) -> LLMFoodAnalysisResult:
         serving_description=i.serving_description or "",
         confidence=float(i.confidence),
     )
-    meal_conf = float(parsed.meal_confidence) if parsed.meal_confidence else ident.confidence
+    if parsed.meal_confidence is None:
+        meal_conf = ident.confidence
+    else:
+        meal_conf = float(parsed.meal_confidence)
     return LLMFoodAnalysisResult(identification=ident, meal_confidence=meal_conf)
 
 
@@ -155,6 +163,12 @@ class BedrockRecognizer:
             parsed = out.get("parsed")
             if isinstance(parsed, _AnalysisModel):
                 return parsed
+            if parsed is None:
+                pe = out.get("parsing_error")
+                if isinstance(pe, ValidationError):
+                    raise pe
+                msg = str(pe) if pe is not None else "structured output parsed is null"
+                raise StructuredOutputParseError(msg)
         raise TypeError(f"Unexpected structured output type: {type(out)}")
 
     def analyze(self, image_bytes: bytes, *, context: dict) -> LLMFoodAnalysisResult:
@@ -181,7 +195,7 @@ class BedrockRecognizer:
             out = self._invoke_chain(chain, base_inputs)
             parsed = self._parse_invoke_result(out)
             return _to_result(parsed)
-        except ValidationError as e:
+        except (ValidationError, StructuredOutputParseError) as e:
             logger.warning("Bedrock structured output validation failed: %s", e)
         except Exception as e:  # noqa: BLE001
             logger.warning("Bedrock chain failed: %s", e)
