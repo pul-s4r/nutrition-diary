@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import csv
 import http.cookiejar
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
@@ -23,6 +24,24 @@ def _mfp_client_factory() -> type[Any]:
             "Install it in your environment or use ND_MFP_MODE=csv."
         ) from e
     return Client
+
+
+@contextmanager
+def _plain_requests_session_for_mfp_client() -> Iterator[None]:
+    """`myfitnesspal` uses cloudscraper by default; MFP often returns 403 on cookie auth with it."""
+    import cloudscraper
+    import requests
+
+    orig = cloudscraper.create_scraper
+    try:
+
+        def _plain(sess: requests.Session | None = None, **kwargs: Any) -> requests.Session:
+            return sess if sess is not None else requests.Session()
+
+        cloudscraper.create_scraper = _plain  # type: ignore[method-assign]
+        yield
+    finally:
+        cloudscraper.create_scraper = orig
 
 
 @dataclass
@@ -55,7 +74,8 @@ class MyFitnessPalUploader:
         if self.settings.mfp_cookie_path is not None:
             jar = http.cookiejar.MozillaCookieJar(str(self.settings.mfp_cookie_path))
             jar.load(ignore_discard=True, ignore_expires=True)
-            return Client(cookiejar=jar)
+            with _plain_requests_session_for_mfp_client():
+                return Client(cookiejar=jar)
         return Client()
 
     def submit_entry(self, entry: DiaryEntry) -> SubmitResult:
