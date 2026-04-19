@@ -31,7 +31,7 @@ class AssembleStage(Stage):
         photos = ctx.db.execute(
             """
             SELECT p.photo_hash, p.source_ref, l.identification_json, l.confidence, g.source, g.fdc_id,
-                   g.matched_name, g.match_conf
+                   g.matched_name, g.match_conf, g.scaled_json
             FROM meal_photos mp
             JOIN photos p ON p.photo_hash=mp.photo_hash
             LEFT JOIN llm_results l ON l.photo_hash=p.photo_hash
@@ -57,10 +57,23 @@ class AssembleStage(Stage):
             ident = json.loads(str(ident_json))
             llm_conf = float(r["confidence"] or 0.0)
             match_conf = r["match_conf"]
-            if match_conf is not None:
-                overall = min(llm_conf, float(match_conf))
+            fdc_id = r["fdc_id"]
+            scaled_json = r["scaled_json"]
+            calories = fat_g = carbs_g = protein_g = fiber_g = sugar_g = sodium_mg = None
+            if scaled_json is not None:
+                sd = json.loads(str(scaled_json))
+                calories = sd.get("calories")
+                fat_g = sd.get("fat_g")
+                carbs_g = sd.get("carbs_g")
+                protein_g = sd.get("protein_g")
+                fiber_g = sd.get("fiber_g")
+                sugar_g = sd.get("sugar_g")
+                sodium_mg = sd.get("sodium_mg")
+
+            if fdc_id is None:
+                overall = 0.0
             else:
-                overall = llm_conf
+                overall = min(llm_conf, float(match_conf or 0.0))
 
             item = FoodItem(
                 name=str(ident["name"]),
@@ -68,9 +81,16 @@ class AssembleStage(Stage):
                 serving_unit=str(ident.get("serving_unit", "g")),
                 serving_description=str(ident.get("serving_description", "")),
                 llm_confidence=llm_conf,
-                normalized_food_id=None if r["fdc_id"] is None else str(r["fdc_id"]),
+                normalized_food_id=None if fdc_id is None else str(fdc_id),
                 grounding_source=None if r["source"] is None else str(r["source"]),
                 grounding_match_confidence=None if match_conf is None else float(match_conf),
+                calories=calories,
+                fat_g=fat_g,
+                carbs_g=carbs_g,
+                protein_g=protein_g,
+                fiber_g=fiber_g,
+                sugar_g=sugar_g,
+                sodium_mg=sodium_mg,
                 overall_confidence=overall,
             )
             entry_conf = min(entry_conf, overall)
